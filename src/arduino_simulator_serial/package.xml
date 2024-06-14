@@ -2,10 +2,10 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>arduino_simulator_serial</name>
-  <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="mcallahan@todo.todo">mcallahan</maintainer>
-  <license>TODO: License declaration</license>
+  <version>0.0.1</version>
+  <description>Arduino Simulator Node for ROS2 using Virtual Serial Port</description>
+  <maintainer>michaelcallahan</maintainer>
+  <license>license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <build_depend>rclpy</build_depend>
