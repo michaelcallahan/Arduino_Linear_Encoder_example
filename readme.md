@@ -4,7 +4,7 @@ This project demonstrates how to control a linear CNC stage using an Arduino, a 
 
 ## Components
 
-- **Arduino (e.g., Arduino Uno, Mega)**
+- **Arduino (e.g., Arduino Portenta 7, Nano RP2040 Connect)**
 - **TMC2209 Stepper Motor Driver**
 - **Stepper Motor**
 - **Mitutoyo LGS-1012P Linear Encoder**
@@ -52,7 +52,7 @@ The Arduino code for this project, which communicates over the `micro-ROS` agent
 
 For this example, we will configure a ROS2 environment with the `micro-ROS` agent and use the `motor_controller` and `arduino_simulator_serial` packages to simulate a closed loop sequence.
 
-Once these two are working together, we only need to modify the serial port which `micro-ROS` communicates over to target an actual Arduino Uno running the `.ino` sketch above.
+Once these two are working together, we only need to modify the serial port which `micro-ROS` communicates over to target an actual Arduino running the `.ino` sketch above.
 
 ### Installing `micro-ROS` Agent
 
@@ -114,7 +114,7 @@ ros2 run arduino_simulator_serial arduino_simulator_node /dev/pts/4
 
 This setup allows you to simulate the Arduino `micro-ROS` behavior and communicate over a virtual serial bus using `socat`, making it look like a `micro-ROS` device. You can then test your ROS2 `motor_controller` package without needing the actual hardware.
 
-When we do connect an Arduino Uno running the `micro-ROS` sketch, then we note the communication port, and we initialize the `micro-ROS` agent to interface with the hardware. As long as the Controller Node is running, then we should be able to use the `micro-ROS` agent to give setpoint commands to the Arduino Uno device in order to drive the motor and actuate the position of the linear stage.
+When we do connect an Arduino running the `micro-ROS` sketch, then we note the communication port, and we initialize the `micro-ROS` agent to interface with the hardware. As long as the Controller Node is running, then we should be able to use the `micro-ROS` agent to give setpoint commands to the Arduino device in order to drive the motor and actuate the position of the linear stage.
 
 ## Usage
 
