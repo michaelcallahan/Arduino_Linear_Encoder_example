@@ -42,11 +42,79 @@ This project demonstrates how to control a linear CNC stage using an Arduino, a 
 
 ## Setup Image
 
-![Motor Linear Encoder Setup](./pictures/motor_linear_encoder_setup.jpg)
+![Motor Linear Encoder Setup](./pictures/motor_linear_encoder_setup.png)
 
 ## Arduino Code
 
-The Arduino code for this project can be found in the file: [`/motor_linear_encoder_control/motor_linear_encoder_control.ino`](./motor_linear_encoder_control/motor_linear_encoder_control.ino). This code implements a PID control loop that reads the encoder value and adjusts the motor position to achieve the desired setpoint.
+The Arduino code for this project, which communicates over the `micro-ROS` agent, can be found in the file: [`/motor_linear_encoder_control/motor_linear_encoder_control.ino`](./motor_linear_encoder_control/motor_linear_encoder_control.ino). This code implements a PID control loop that reads the encoder value and adjusts the motor position to achieve the desired setpoint.
+
+## Setting Up and Running the `micro-ROS` Agent with a Simulator
+
+For this example, we will configure a ROS2 environment with the `micro-ROS` agent and use the `motor_controller` and `arduino_simulator_serial` packages to simulate a closed loop sequence.
+
+Once these two are working together, we only need to modify the serial port which `micro-ROS` communicates over to target an actual Arduino Uno running the `.ino` sketch above.
+
+### Installing `micro-ROS` Agent
+
+First, you need to install the `micro-ROS` agent on your ROS2 machine.
+
+### Running `micro-ROS` Agent
+
+Use socat to create linked virtual serial ports on your computer:
+
+```bash
+sudo apt-get install socat
+socat -d -d pty,raw,echo=0 pty,raw,echo=0
+```
+
+### Using `motor_controller` Package
+
+The `motor_controller` package publishes `pos_cmd` values to the Arduino/simulator.
+
+### Using the `arduino_simulator_serial` Package
+
+This package simulates the Arduino behavior and communicates over a virtual serial port.
+
+### Building 
+
+Assuming this repository is near the home root of your environment (modify as necessary), we can build the packages using colcon.
+
+```bash
+cd ~/Arduino_Linear_Encoder_example
+colcon build
+```
+
+### Running the Simulator Node
+
+1. Ensure Virtual Serial Ports are Created using `socat`:
+
+```bash
+socat -d -d pty,raw,echo=0 pty,raw,echo=0
+```
+
+Note the virtual serial ports created, e.g. `/dev/pts/3` and `/dev/pts/4`.
+
+2. Run `micro-ROS` Agent on `/dev/pts/3`:
+
+```bash
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/pts/3
+```
+
+3. Run the Controller Node:
+
+```bash
+ros2 run motor_controller motor_controller_node
+```
+
+4. Run the Simulator Node on `dev/pts/4`:
+
+```bash
+ros2 run arduino_simulator_serial arduino_simulator_node /dev/pts/4
+```
+
+This setup allows you to simulate the Arduino `micro-ROS` behavior and communicate over a virtual serial bus using `socat`, making it look like a `micro-ROS` device. You can then test your ROS2 `motor_controller` package without needing the actual hardware.
+
+When we do connect an Arduino Uno running the `micro-ROS` sketch, then we note the communication port, and we initialize the `micro-ROS` agent to interface with the hardware. As long as the Controller Node is running, then we should be able to use the `micro-ROS` agent to give setpoint commands to the Arduino Uno device in order to drive the motor and actuate the position of the linear stage.
 
 ## Usage
 
