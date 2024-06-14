@@ -42,7 +42,7 @@ This project demonstrates how to control a linear CNC stage using an Arduino, a 
 
 ## Setup Image
 
-![Motor Linear Encoder Setup](./pictures/motor_linear_encoder_setup.png)
+![Motor Linear Encoder Setup](./pictures/motor_linear_encoder_setup.jpg)
 
 ## Arduino Code
 
