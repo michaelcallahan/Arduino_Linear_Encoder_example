@@ -1,0 +1,67 @@
+# ROS2 build artifacts
+/build/
+/install/
+/log/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ROS2 specific files
+.colcon/
+src/ros2.repos
+
+# Ignore hidden files and folders
+.DS_Store
+._*
+
+# Ignore system-specific files
+Thumbs.db
+desktop.ini
+
+# Ignore VS Code workspace settings
+.vscode/
+
+# Ignore JetBrains IDEs
+.idea/
+*.iml
+
+# Ignore CLion IDE
+.cmake/
+CMakeLists.txt.user
+
+# Ignore Eclipse IDE
+.project
+.cproject
+.settings/
+
+# Ignore other potential IDE or editor specific files
+*.swp
+*~
+
+# Ignore virtual environment folders
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Ignore configuration and setup files
+.ros/
+
+# Ignore custom logs
+*.log
+*.log.*
+
+# Ignore backup files
+*~
+*.bak
+*.tmp
+*.temp
+
+# Ignore Python packaging files
+*.egg-info/
+dist/
+build/
