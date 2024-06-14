@@ -48,6 +48,8 @@ This project demonstrates how to control a linear CNC stage using an Arduino, a 
 
 The Arduino code for this project, which communicates over the `micro-ROS` agent, can be found in the file: [`/motor_linear_encoder_control/motor_linear_encoder_control.ino`](./motor_linear_encoder_control/motor_linear_encoder_control.ino). This code implements a PID control loop that reads the encoder value and adjusts the motor position to achieve the desired setpoint.
 
+Additionally, there is a sketch which does not make use of the `micro-ROS` agent, and it provides a proof-of-concept that the system can in fact use PID control to drive the linear stage towards an encoder position of 7.5mm under the file: [`/motor_linear_encoder_control_test/motor_linear_encoder_control_test.ino`](./motor_linear_encoder_control_test/motor_linear_encoder_control_test.ino)
+
 ## Setting Up and Running the `micro-ROS` Agent with a Simulator
 
 For this example, we will configure a ROS2 environment with the `micro-ROS` agent and use the `motor_controller` and `arduino_simulator_serial` packages to simulate a closed loop sequence.
