@@ -14,6 +14,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='michaelcallahan',
+    author_email='mike.w.callahan@gmail.com',
     description='ROS2 Motor Controller Node',
     license='MIT License',
     tests_require=['pytest'],

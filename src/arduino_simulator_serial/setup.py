@@ -14,6 +14,7 @@ setup(
     install_requires=['setuptools', 'python-serial'],
     zip_safe=True,
     maintainer='michaelcallahan',
+    author_email='mike.w.callahan@gmail.com',
     description='Arduino Simulator Node for ROS2 using Virtual Serial Port',
     license='MIT License',
     tests_require=['pytest'],

@@ -4,7 +4,7 @@
   <name>motor_controller</name>
   <version>0.0.1</version>
   <description>ROS2 Motor Controller Node</description>
-  <maintainer>michaelcallahan</maintainer>
+  <maintainer email="mike.w.callahan@gmail.com">michaelcallahan</maintainer>
   <license>license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

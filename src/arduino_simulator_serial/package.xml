@@ -4,7 +4,7 @@
   <name>arduino_simulator_serial</name>
   <version>0.0.1</version>
   <description>Arduino Simulator Node for ROS2 using Virtual Serial Port</description>
-  <maintainer>michaelcallahan</maintainer>
+  <maintainer email="mike.w.callahan@gmail.com">michaelcallahan</maintainer>
   <license>license</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
