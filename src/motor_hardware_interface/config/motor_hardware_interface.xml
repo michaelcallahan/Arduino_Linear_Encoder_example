@@ -1,0 +1,9 @@
+<library path="libmotor_hardware_interface.so">
+  <class name="motor_hardware_interface::MotorHardwareInterface"
+         type="motor_hardware_interface::MotorHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Motor hardware interface to communicate with the Arduino via micro-ROS.
+    </description>
+  </class>
+</library>
