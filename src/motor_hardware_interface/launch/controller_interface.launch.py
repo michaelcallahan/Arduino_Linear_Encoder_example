@@ -6,6 +6,6 @@ def generate_launch_description():
         Node(
             package='controller_manager',
             executable='spawner',
-            arguments=['motor_controller'],
+            arguments=['linear_joint', '--controller-manager', "/controller_manager"],
             output='screen'),
     ])

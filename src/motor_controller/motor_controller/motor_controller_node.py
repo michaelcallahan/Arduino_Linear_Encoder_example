@@ -7,10 +7,10 @@ class MotorController(Node):
         super().__init__('motor_controller')
         self.subscription = self.create_subscription(
             Float32,
-            'encoder',
+            '/microROS/encoder',
             self.encoder_callback,
             10)
-        self.publisher = self.create_publisher(Float32, 'pos_cmd', 10)
+        self.publisher = self.create_publisher(Float32, '/microROS/setpoint', 10)
         self.timer = self.create_timer(0.1, self.timer_callback)
         self.setpoint = 7.5
 

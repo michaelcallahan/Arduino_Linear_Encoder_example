@@ -98,13 +98,13 @@ void setup()
       &publisher,
       &node,
       ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
-      "encoder");
+      "/microROS/encoder");
 
   rclc_subscription_init_default(
       &subscriber,
       &node,
       ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32),
-      "pos_cmd");
+      "/microROS/setpoint");
 
   rclc_executor_init(&executor, &support.context, 1, &allocator);
   rclc_executor_add_subscription(&executor, &subscriber, &position_msg, &positionControlCallback, ON_NEW_DATA);

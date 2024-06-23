@@ -10,10 +10,13 @@ class ArduinoSimulatorSerial(Node):
     def __init__(self, port):
         super().__init__('arduino_simulator_serial')
         self.ser = serial.Serial(port, 115200, timeout=1)
-        self.publisher = self.create_publisher(Float32, 'encoder', 10)
+        self.publisher = self.create_publisher(
+            Float32, 
+            '/microROS/encoder', 
+            10)
         self.subscription = self.create_subscription(
             Float32,
-            'pos_cmd',
+            '/microROS/setpoint',
             self.pos_cmd_callback,
             10)
         self.subscription  # prevent unused variable warning
