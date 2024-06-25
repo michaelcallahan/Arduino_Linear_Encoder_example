@@ -25,18 +25,18 @@
 #define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Continuing.\n",__LINE__,(int)temp_rc);}}
 
 /* Pin Definitions */
-#define DIR_PIN GPIO_PIN_0   // D2 -> GPIOA_PIN_0
+#define DIR_PIN GPIO_PIN_10   // D2 -> GPIOA_PIN_10
 #define DIR_PORT GPIOA
-#define STEP_PIN GPIO_PIN_1  // D3 -> GPIOA_PIN_1
-#define STEP_PORT GPIOA
-#define EN_PIN GPIO_PIN_2    // D4 -> GPIOA_PIN_2
-#define EN_PORT GPIOA
+#define STEP_PIN GPIO_PIN_3  // D3 -> GPIOA_PIN_3
+#define STEP_PORT GPIOB
+#define EN_PIN GPIO_PIN_5    // D4 -> GPIOA_PIN_5
+#define EN_PORT GPIOB
 
-#define DATA_PIN GPIO_PIN_6  // D8 -> GPIOB_PIN_6
-#define DATA_PORT GPIOB
+#define DATA_PIN GPIO_PIN_9  // D8 -> GPIOB_PIN_9
+#define DATA_PORT GPIOA
 #define CK_PIN GPIO_PIN_7    // D9 -> GPIOA_PIN_7
-#define CK_PORT GPIOA
-#define REQ_PIN GPIO_PIN_5   // D11 -> GPIOA_PIN_5
+#define CK_PORT GPIOC
+#define REQ_PIN GPIO_PIN_7   // D11 -> GPIOA_PIN_7
 #define REQ_PORT GPIOA
 
 rcl_publisher_t publisher;
@@ -47,7 +47,6 @@ std_msgs__msg__Float32 position_msg;
 
 int device_id;
 int seq_no;
-int pong_count;
 
 /* PID constants */
 float Kp = 30.0;
