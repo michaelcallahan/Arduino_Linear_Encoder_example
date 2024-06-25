@@ -2,6 +2,7 @@
 /build/
 /install/
 /log/
+/firmware/
 
 # Python
 __pycache__/
