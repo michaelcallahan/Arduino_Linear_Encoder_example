@@ -21,22 +21,37 @@
 
 #define STRING_BUFFER_LEN 50
 
-#define RCCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Aborting.\n",__LINE__,(int)temp_rc); vTaskDelete(NULL);}}
-#define RCSOFTCHECK(fn) { rcl_ret_t temp_rc = fn; if((temp_rc != RCL_RET_OK)){printf("Failed status on line %d: %d. Continuing.\n",__LINE__,(int)temp_rc);}}
+#define RCCHECK(fn)                                                                      \
+    {                                                                                    \
+        rcl_ret_t temp_rc = fn;                                                          \
+        if ((temp_rc != RCL_RET_OK))                                                     \
+        {                                                                                \
+            printf("Failed status on line %d: %d. Aborting.\n", __LINE__, (int)temp_rc); \
+            vTaskDelete(NULL);                                                           \
+        }                                                                                \
+    }
+#define RCSOFTCHECK(fn)                                                                    \
+    {                                                                                      \
+        rcl_ret_t temp_rc = fn;                                                            \
+        if ((temp_rc != RCL_RET_OK))                                                       \
+        {                                                                                  \
+            printf("Failed status on line %d: %d. Continuing.\n", __LINE__, (int)temp_rc); \
+        }                                                                                  \
+    }
 
 /* Pin Definitions */
-#define DIR_PIN GPIO_PIN_10   // D2 -> GPIOA_PIN_10
+#define DIR_PIN GPIO_PIN_10 // D2 -> GPIOA_PIN_0
 #define DIR_PORT GPIOA
-#define STEP_PIN GPIO_PIN_3  // D3 -> GPIOA_PIN_3
+#define STEP_PIN GPIO_PIN_3 // D3 -> GPIOA_PIN_1
 #define STEP_PORT GPIOB
-#define EN_PIN GPIO_PIN_5    // D4 -> GPIOA_PIN_5
+#define EN_PIN GPIO_PIN_5 // D4 -> GPIOA_PIN_2
 #define EN_PORT GPIOB
 
-#define DATA_PIN GPIO_PIN_9  // D8 -> GPIOB_PIN_9
+#define DATA_PIN GPIO_PIN_8 // D8 -> GPIOB_PIN_6
 #define DATA_PORT GPIOA
-#define CK_PIN GPIO_PIN_7    // D9 -> GPIOA_PIN_7
+#define CK_PIN GPIO_PIN_7 // D9 -> GPIOA_PIN_7
 #define CK_PORT GPIOC
-#define REQ_PIN GPIO_PIN_7   // D11 -> GPIOA_PIN_7
+#define REQ_PIN GPIO_PIN_7 // D11 -> GPIOA_PIN_5
 #define REQ_PORT GPIOA
 
 rcl_publisher_t publisher;
@@ -47,6 +62,7 @@ std_msgs__msg__Float32 position_msg;
 
 int device_id;
 int seq_no;
+int pong_count;
 
 /* PID constants */
 float Kp = 30.0;
@@ -54,7 +70,7 @@ float Ki = 0.0;
 float Kd = 0.0;
 
 /* PID variables */
-float setpoint = 7.5;  // Desired position in mm (initial value)
+float setpoint = 7.5; // Desired position in mm (initial value)
 float input, output;
 float lastInput;
 float ITerm;
@@ -64,19 +80,20 @@ float speedMult = 300;
 volatile long encoderData = 0;
 volatile bool newDataAvailable = false;
 
-void timer_callback(rcl_timer_t * timer, int64_t last_call_time)
+void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
-	RCLC_UNUSED(last_call_time);
+    RCLC_UNUSED(last_call_time);
 
-	if (timer != NULL) {
+    if (timer != NULL)
+    {
 
-		seq_no = rand();
+        seq_no = rand();
 
-		// Fill the message timestamp
-		struct timespec ts;
-		clock_gettime(CLOCK_REALTIME, &ts);
-    rcl_publish(&publisher, &encoder_msg, NULL);
-	}
+        // Fill the message timestamp
+        struct timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        rcl_publish(&publisher, &encoder_msg, NULL);
+    }
 }
 
 void positionControlCallback(const void *msg_in)
@@ -99,13 +116,17 @@ void computePID()
 {
     float error = setpoint - input;
     ITerm += (Ki * error);
-    if (ITerm > 255) ITerm = 255;
-    else if (ITerm < -255) ITerm = -255;
+    if (ITerm > 255)
+        ITerm = 255;
+    else if (ITerm < -255)
+        ITerm = -255;
     float dInput = (input - lastInput);
 
     output = Kp * error + ITerm - Kd * dInput;
-    if (output > 255) output = 255;
-    else if (output < -255) output = -255;
+    if (output > 255)
+        output = 255;
+    else if (output < -255)
+        output = -255;
 
     lastInput = input;
 
@@ -113,10 +134,13 @@ void computePID()
     snprintf(buffer, sizeof(buffer), "PID Output: %f\r\n", output);
     HAL_UART_Transmit(&huart2, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
 
-    if (output > 0) {
+    if (output > 0)
+    {
         motorSetDirection(0); // Set direction to forward
         motorStep();
-    } else {
+    }
+    else
+    {
         motorSetDirection(1); // Set direction to backward
         motorStep();
     }
@@ -133,16 +157,28 @@ float readEncoder()
     char value_str[7];
     long value_int;
     float value;
+    uint32_t timeout = 200;
 
     HAL_GPIO_WritePin(REQ_PORT, REQ_PIN, GPIO_PIN_RESET);
+    HAL_Delay(5);
+    HAL_GPIO_WritePin(REQ_PORT, REQ_PIN, GPIO_PIN_SET);
 
-    for (int i = 0; i < 13; i++) {
+    TIM6->CNT = 0;
+
+    for (int i = 0; i < 13; i++)
+    {
         char value = 0;
-        for (int bit = 0; bit < 4; bit++) {
-            /** //For Debugging Purposes
-            while (HAL_GPIO_ReadPin(CK_PORT, CK_PIN) == GPIO_PIN_RESET); // Wait until clock is high
-            while (HAL_GPIO_ReadPin(CK_PORT, CK_PIN) == GPIO_PIN_SET); // Wait until clock is low
-            */
+        for (int bit = 0; bit < 4; bit++)
+        {
+            // For Debugging Purposes
+            while (HAL_GPIO_ReadPin(CK_PORT, CK_PIN) == GPIO_PIN_RESET && timeout > TIM6->CNT)
+
+                ; // Wait until clock is high
+
+            while (HAL_GPIO_ReadPin(CK_PORT, CK_PIN) == GPIO_PIN_SET && timeout > TIM6->CNT)
+
+                ; // Wait until clock is high; // Wait until clock is low
+
             value |= (HAL_GPIO_ReadPin(DATA_PORT, DATA_PIN) & 0x1) << bit;
         }
         data[i] = value;
@@ -154,19 +190,35 @@ float readEncoder()
     units = data[12];
     value_int = atoi(value_str);
 
-    switch (decimal) {
-        case 0: dpp = 1.0; break;
-        case 1: dpp = 10.0; break;
-        case 2: dpp = 100.0; break;
-        case 3: dpp = 1000.0; break;
-        case 4: dpp = 10000.0; break;
-        case 5: dpp = 100000.0; break;
-        default: dpp = 1.0; break;
+    switch (decimal)
+    {
+    case 0:
+        dpp = 1.0;
+        break;
+    case 1:
+        dpp = 10.0;
+        break;
+    case 2:
+        dpp = 100.0;
+        break;
+    case 3:
+        dpp = 1000.0;
+        break;
+    case 4:
+        dpp = 10000.0;
+        break;
+    case 5:
+        dpp = 100000.0;
+        break;
+    default:
+        dpp = 1.0;
+        break;
     }
 
     value = value_int / dpp;
-    value = input + output/500; //For Simulation Purposes
-    HAL_GPIO_WritePin(REQ_PORT, REQ_PIN, GPIO_PIN_SET);
+    // value = input + output/500; //For Simulation Purposes
+    // HAL_GPIO_WritePin(REQ_PORT, REQ_PIN, GPIO_PIN_SET);
+    // value = HAL_GPIO_ReadPin(CK_PORT, CK_PIN);
 
     char buffer[50];
     snprintf(buffer, sizeof(buffer), "Encoder value: %f\r\n", value);
@@ -175,22 +227,27 @@ float readEncoder()
     return value;
 }
 
-
 void motorSetDirection(uint8_t direction)
 {
-    if (direction == 0) {
+    if (direction == 0)
+    {
         HAL_GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_RESET); // Forward
-    } else {
-        HAL_GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_SET);   // Backward
+    }
+    else
+    {
+        HAL_GPIO_WritePin(DIR_PORT, DIR_PIN, GPIO_PIN_SET); // Backward
     }
 }
 
 void motorEnable(uint8_t enable)
 {
-    if (enable == 0) {
+    if (enable == 0)
+    {
         HAL_GPIO_WritePin(EN_PORT, EN_PIN, GPIO_PIN_RESET); // Disable
-    } else {
-        HAL_GPIO_WritePin(EN_PORT, EN_PIN, GPIO_PIN_SET);   // Enable
+    }
+    else
+    {
+        HAL_GPIO_WritePin(EN_PORT, EN_PIN, GPIO_PIN_SET); // Enable
     }
 }
 
@@ -203,40 +260,40 @@ void motorStep(void)
 
 void appMain(void *argument)
 {
-	rcl_allocator_t allocator = rcl_get_default_allocator();
-	rclc_support_t support;
+    rcl_allocator_t allocator = rcl_get_default_allocator();
+    rclc_support_t support;
 
-	// create init_options
-	RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
+    // create init_options
+    RCCHECK(rclc_support_init(&support, 0, NULL, &allocator));
 
-	// create node
-	rcl_node_t node;
-	RCCHECK(rclc_node_init_default(&node, "microros_node", "", &support));
+    // create node
+    rcl_node_t node;
+    RCCHECK(rclc_node_init_default(&node, "microros_node", "", &support));
 
-	// Create a reliable publisher
-	RCCHECK(rclc_publisher_init_default(&publisher, &node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32), "/microROS/encoder"));
+    // Create a reliable publisher
+    RCCHECK(rclc_publisher_init_default(&publisher, &node,
+                                        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32), "/microROS/encoder"));
 
-	// Create a best effort subscriber
-	RCCHECK(rclc_subscription_init_best_effort(&subscriber, &node,
-		ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32), "/microROS/setpoint"));
+    // Create a best effort subscriber
+    RCCHECK(rclc_subscription_init_best_effort(&subscriber, &node,
+                                               ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Float32), "/microROS/setpoint"));
 
+    // Create a 3 seconds ping timer timer,
+    rcl_timer_t timer;
+    RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(2000), timer_callback));
 
-	// Create a 3 seconds ping timer timer,
-	rcl_timer_t timer;
-	RCCHECK(rclc_timer_init_default(&timer, &support, RCL_MS_TO_NS(2000), timer_callback));
+    // Create executor
+    rclc_executor_t executor;
+    RCCHECK(rclc_executor_init(&executor, &support.context, 3, &allocator));
+    RCCHECK(rclc_executor_add_timer(&executor, &timer));
+    RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &position_msg,
+                                           &positionControlCallback, ON_NEW_DATA));
 
+    device_id = rand();
+    HAL_GPIO_WritePin(REQ_PORT, REQ_PIN, GPIO_PIN_SET);
 
-	// Create executor
-	rclc_executor_t executor;
-	RCCHECK(rclc_executor_init(&executor, &support.context, 3, &allocator));
-	RCCHECK(rclc_executor_add_timer(&executor, &timer));
-	RCCHECK(rclc_executor_add_subscription(&executor, &subscriber, &position_msg,
-		&positionControlCallback, ON_NEW_DATA));
-
-	device_id = rand();
-
-	while(1){
+    while (1)
+    {
 
         /* Read encoder data */
         input = readEncoder();
@@ -245,12 +302,12 @@ void appMain(void *argument)
 
         /* Compute PID */
         computePID();
-		rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
-		usleep(100000);
-	}
+        rclc_executor_spin_some(&executor, RCL_MS_TO_NS(10));
+        usleep(100000);
+    }
 
-	// Free resources
-	RCCHECK(rcl_publisher_fini(&publisher, &node));
-	RCCHECK(rcl_subscription_fini(&subscriber, &node));
-	RCCHECK(rcl_node_fini(&node));
+    // Free resources
+    RCCHECK(rcl_publisher_fini(&publisher, &node));
+    RCCHECK(rcl_subscription_fini(&subscriber, &node));
+    RCCHECK(rcl_node_fini(&node));
 }
