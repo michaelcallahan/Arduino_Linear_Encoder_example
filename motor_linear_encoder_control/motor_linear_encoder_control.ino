@@ -2,6 +2,10 @@
 #include <TMCStepper.h>
 #include <std_msgs/msg/float32.h>
 #include <std_msgs/msg/float32.h>
+#include <rcl/rcl.h>
+#include <rcl/error_handling.h>
+#include <rclc/rclc.h>
+#include <rclc/executor.h>
 
 // Define pin connections
 #define ENABLE_PIN 2
@@ -17,6 +21,8 @@
 
 #define DRIVER_ADDRESS 0b00
 #define R_SENSE 0.11f
+
+#define SERIAL_PORT Serial1
 
 // PID constants
 float Kp = 30.0;
